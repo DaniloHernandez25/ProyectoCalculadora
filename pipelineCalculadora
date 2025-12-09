@@ -1,0 +1,62 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "762bf679",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pipeline {\n",
+    "    agent any\n",
+    "\n",
+    "    stages {\n",
+    "        stage('Checkout') {\n",
+    "            steps {\n",
+    "                checkout scm\n",
+    "            }\n",
+    "        }\n",
+    "\n",
+    "        stage('Restore') {\n",
+    "            steps {\n",
+    "                sh 'dotnet restore projectCalculadora.sln'\n",
+    "            }\n",
+    "        }\n",
+    "\n",
+    "        stage('Build') {\n",
+    "            steps {\n",
+    "                sh 'dotnet build projectCalculadora.sln --configuration Release'\n",
+    "            }\n",
+    "        }\n",
+    "\n",
+    "        stage('Test') {\n",
+    "            steps {\n",
+    "                sh 'dotnet test calculadoraApp.Tests/calculadoraApp.Tests.csproj --configuration Release --no-build'\n",
+    "            }\n",
+    "        }\n",
+    "\n",
+    "        stage('Publish') {\n",
+    "            steps {\n",
+    "                // CORRECCIÓN IMPORTANTE: usar / en lugar de \\\n",
+    "                sh 'dotnet publish calculadoraApp/calculadoraApp.csproj --configuration Release --output publish'\n",
+    "            }\n",
+    "        }\n",
+    "    }\n",
+    "\n",
+    "    post {\n",
+    "        success {\n",
+    "            archiveArtifacts artifacts: 'publish/**', fingerprint: true\n",
+    "        }\n",
+    "    }\n",
+    "}\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "language_info": {
+   "name": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
